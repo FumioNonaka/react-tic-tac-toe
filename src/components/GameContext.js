@@ -1,31 +1,57 @@
 import { createContext, useState } from 'react';
 
 const initialContext = {
-	squares: Array(9).fill(null),
+	history: [
+		{squares: Array(9).fill(null)},
+	],
 	xIsNext: true,
 	winner: null,
+	stepNumber: 0,
 };
 export const GameContext = createContext(initialContext);
 export const GameProvider = ({ children }) => {
-	const [squares, setSquares] = useState(initialContext.squares);
+	const [history, setHistory] = useState(initialContext.history);
 	const [xIsNext, setXIsNext] = useState(initialContext.xIsNext);
 	const [finished, setFinished] = useState(false);
 	const [winner, setWinner] = useState(initialContext.winner);
+	const [stepNumber, setStepNumber] = useState(initialContext.stepNumber);
 	const handleClick = (i) => {
-		const _squares = [...squares];
+		const _history = history.slice(0, stepNumber + 1);
+		const _squares = [..._history[_history.length - 1].squares];
 		if (_squares[i]) { return; }
 		if (finished) { return; }
 		_squares[i] = xIsNext ? 'X' : 'O';
-		setSquares(_squares);
+		setHistory([..._history, { squares: _squares }]);
 		setXIsNext(!xIsNext);
+		setStepNumber(_history.length);
 		const _winner = calculateWinner(_squares);
 		setWinner(_winner);
 		if (_winner) {
 			setFinished(true);
 		}
 	};
+	const jumpTo = (step) => {
+		const winner = calculateWinner([...history[step].squares]);
+		setWinner(winner);
+		setStepNumber(step);
+		setXIsNext((step % 2) === 0);
+		if (winner) {
+			setFinished(true);
+		} else {
+			setFinished(false);
+		}
+	};
 	return (
-		<GameContext.Provider value={{ onClick: handleClick, squares, winner, xIsNext }}>
+		<GameContext.Provider
+			value={{
+				onClick: handleClick,
+				jumpTo,
+				history,
+				stepNumber,
+				winner,
+				xIsNext,
+			}}
+		>
 			{children}
 		</GameContext.Provider>
 	);
