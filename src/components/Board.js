@@ -1,17 +1,20 @@
+import { useCallback } from 'react';
 import Square from './Square';
 
 const Board = () => {
-	const renderSquare = (i) =>
+	const renderSquare = useCallback((i) => (
 		<Square
 			id={i}
 			key={i}
-		/>;
-	const renderRow = (start) =>
+		/>
+	), []);
+	const renderRow = useCallback((start) => (
 		<div className="board-row">
 			{Array.from(Array(3), (_, index) => (
 				renderSquare(start + index)
 			))}
-		</div>;
+		</div>
+	), [renderSquare]);
 	return (
 		<div>
 			{renderRow(0)}
