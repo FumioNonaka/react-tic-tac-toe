@@ -1,4 +1,4 @@
-import { createContext, useState } from 'react';
+import { createContext, useCallback, useState } from 'react';
 
 const initialContext = {
 	history: [
@@ -15,7 +15,7 @@ export const GameProvider = ({ children }) => {
 	const [finished, setFinished] = useState(false);
 	const [winner, setWinner] = useState(initialContext.winner);
 	const [stepNumber, setStepNumber] = useState(initialContext.stepNumber);
-	const handleClick = (i) => {
+	const handleClick = useCallback((i) => {
 		const _history = history.slice(0, stepNumber + 1);
 		const _squares = [..._history[_history.length - 1].squares];
 		if (_squares[i]) { return; }
@@ -29,8 +29,8 @@ export const GameProvider = ({ children }) => {
 		if (_winner) {
 			setFinished(true);
 		}
-	};
-	const jumpTo = (step) => {
+	}, [finished, history, stepNumber, xIsNext]);
+	const jumpTo = useCallback((step) => {
 		const winner = calculateWinner([...history[step].squares]);
 		setWinner(winner);
 		setStepNumber(step);
@@ -40,7 +40,7 @@ export const GameProvider = ({ children }) => {
 		} else {
 			setFinished(false);
 		}
-	};
+	}, [history]);
 	return (
 		<GameContext.Provider
 			value={{
